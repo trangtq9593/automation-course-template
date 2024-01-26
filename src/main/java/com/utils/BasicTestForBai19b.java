@@ -5,6 +5,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
@@ -12,10 +13,11 @@ import org.testng.annotations.Parameters;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 
-public abstract class BasicTest {
+public abstract class BasicTestForBai19b {
     
     public static final Logger logger = LogManager.getLogger();
     protected static WebDriver driver;
+    protected static ExcelUtils excel = new ExcelUtils("src\\test\\resources\\", "TestLoginFile.xlsx");
     // private String driverPath;
 
     @BeforeMethod
@@ -36,25 +38,26 @@ public abstract class BasicTest {
 
     @DataProvider(name = "testLogin")
     public Object[][] TestDataFeed() {
-
+        ExcelUtils excel = new ExcelUtils("src\\test\\resources\\", "TestLoginFile.xlsx");
         //Create object array 3 rows, 2 columns
-        Object[][] testData = new Object[3][2];
+        int total_row = excel.getRowCount();
+        Object[][] testData = new Object[total_row-1][3];
 
         //Data Test
-        testData[0][0] = "admin";
-        testData[0][1] = "admin";
-
-        testData[1][0] = "manager";
-        testData[1][1] = "demouserpwd";
-       
-        testData[2][0] = "user1";
-        testData[2][1] = "demouserpwd";
-
+        for (int i = 1; i < total_row; i++) {
+            testData[i][0] = excel.getData(i, 0);
+            testData[i][1] = excel.getData(i, 1);
+            testData[i][2] = excel.getData(i, 2);
+        }
         return testData;
     }
     @AfterMethod
     public void postCondition(){
         // Quit the Browser
         driver.quit();
+    }
+    @AfterSuite
+    public void exportResult() throws Exception {
+        excel.saveNewFile("src\\test\\resources\\", "TestLoginFile.xlsx");
     }
 }
